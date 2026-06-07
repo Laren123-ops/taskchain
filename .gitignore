@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build
+build/
+cache/
+artifacts/
+typechain-types/
+
+# .env
+.env
+.env.local
+.env.*.local
+
+# coverage
+coverage/
+coverage.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+
+# testing
+test/**/tmp/
