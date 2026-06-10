@@ -49,6 +49,41 @@ body {
 }
 .btn-connect:hover { opacity: 0.9; }
 
+.btn-settings {
+  background: #1a1a2e; border: 1px solid #2a2a3e;
+  color: #64748b; width: 36px; height: 36px;
+  border-radius: 8px; font-size: 16px; cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-settings:hover { border-color: #6366f1; color: #a5b4fc; }
+
+.connect-group { display: flex; gap: 8px; }
+
+.btn-ro {
+  background: #1a1a2e; border: 1px solid #3b82f6;
+  color: #818cf8; padding: 10px 16px;
+  border-radius: 8px; font-weight: 600; cursor: pointer;
+  font-size: 14px; transition: all 0.2s;
+}
+.btn-ro:hover { background: #1e2a4a; }
+
+.settings-bar {
+  background: #0f0f1a; border-bottom: 1px solid #1e1e2e;
+  padding: 12px 32px;
+}
+.settings-inner {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.settings-inner label { font-size: 12px; color: #64748b; white-space: nowrap; }
+.settings-inner input {
+  background: #1a1a2e; border: 1px solid #2a2a3e;
+  color: #e2e8f0; padding: 8px 12px;
+  border-radius: 8px; font-size: 13px; font-family: monospace;
+  flex: 1; min-width: 200px;
+}
+.settings-inner input:focus { outline: none; border-color: #6366f1; }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+
 .main {
   display: grid; grid-template-columns: 380px 1fr; gap: 24px;
   padding: 24px 32px; flex: 1;
