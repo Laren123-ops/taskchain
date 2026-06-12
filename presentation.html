@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskChain — PPT</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Inter","Microsoft YaHei",sans-serif; background: #0a0a0f; color: #e2e8f0; }
+  .slide { width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 80px; position: relative; overflow: hidden; }
+  .slide::before { content: ""; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%); pointer-events: none; }
+  .slide::after { content: ""; position: absolute; bottom: -100px; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(168,85,247,0.06) 0%, transparent 70%); pointer-events: none; }
+
+  .logo { position: absolute; top: 40px; left: 60px; font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .tag { position: absolute; top: 40px; right: 60px; font-size: 13px; color: #64748b; background: #111118; border: 1px solid #2a2a3e; padding: 6px 16px; border-radius: 20px; }
+  .page { position: absolute; bottom: 40px; right: 60px; font-size: 13px; color: #475569; }
+
+  h1 { font-size: 72px; font-weight: 800; line-height: 1.1; background: linear-gradient(135deg, #6366f10%, #a855f7 50%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; text-align: center; }
+  h2 { font-size: 48px; font-weight: 700; color: #e2e8f0; margin-bottom: 48px; }
+  h3 { font-size: 28px; font-weight: 600; color: #94a3b8; margin-bottom: 24px; }
+
+  .subtitle { font-size: 24px; color: #64748b; margin-top: 24px; text-align: center; }
+  .meta { font-size: 16px; color: #475569; margin-top: 16px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; width: 100%; max-width: 1100px; }
+  .card { background: #111118; border: 1px solid #1e1e2e; border-radius: 16px; padding: 32px; }
+  .card h3 { font-size: 20px; color: #e2e8f0; margin-bottom: 16px; }
+  .card p { font-size: 16px; color: #94a3b8; line-height: 1.7; }
+  .card .icon { font-size: 40px; margin-bottom: 16px; }
+
+  .flow { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; max-width: 1000px; }
+  .flow-step { background: #111118; border: 2px solid #2a2a3e; border-radius: 12px; padding: 20px 28px; text-align: center; min-width: 140px; }
+  .flow-step .name { font-size: 14px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .flow-step .status { font-size: 12px; color: #64748b; margin-bottom: 8px; }
+  .flow-step .addr { font-size: 11px; font-family: monospace; color: #818cf8; }
+  .flow-arrow { font-size: 24px; color: #3b82f6; }
+
+  .state-box { display: inline-block; padding: 8px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; margin: 4px; }
+  .s-none { background: #1a1a2e; color: #666; }
+  .s-created { background: rgba(59,130,246,0.15); color: #3b82f6; border: 1px solid rgba(59,130,246,0.3); }
+  .s-funded { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+  .s-submitted { background: rgba(139,92,246,0.15); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3); }
+  .s-verified { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.3); }
+  .s-failed { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+  .s-refunded { background: rgba(6,182,212,0.15); color: #06b6d4; border: 1px solid rgba(6,182,212,0.3); }
+
+  .code-block { background: #0d0d14; border: 1px solid #1e1e2e; border-radius: 12px; padding: 24px; font-family: monospace; font-size: 14px; color: #a5b4fc; line-height: 1.8; width: 100%; max-width: 900px; }
+  .code-block .c { color: #64748b; }
+  .code-block .fn { color: #f472b6; }
+  .code-block .str { color: #4ade80; }
+  .code-block .num { color: #fbbf24; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; max-width: 1100px; }
+  .feat { background: #111118; border: 1px solid #1e1e2e; border-radius: 12px; padding: 24px; text-align: center; }
+  .feat .num { font-size: 48px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
+  .feat .title { font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
+  .feat .desc { font-size: 13px; color: #64748b; line-height: 1.6; }
+
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; max-width: 900px; }
+  .comp-item { display: flex; align-items: center; gap: 12px; font-size: 16px; color: #94a3b8; padding: 12px 0; border-bottom: 1px solid #1e1e2e; }
+  .comp-item:last-child { border-bottom: none; }
+  .comp-yes { color: #22c55e; font-size: 20px; }
+  .comp-no { color: #ef4444; font-size: 20px; }
+
+  .timeline { display: flex; gap: 24px; width: 100%; max-width: 1000px; }
+  .t-item { flex: 1; background: #111118; border: 1px solid #1e1e2e; border-radius: 12px; padding: 24px; }
+  .t-item .week { font-size: 12px; color: #6366f1; font-weight: 600; margin-bottom: 8px; }
+  .t-item .title { font-size: 16px; font-weight: 600; color: #e2e8f0; margin-bottom: 8px; }
+  .t-item .desc { font-size: 13px; color: #64748b; line-height: 1.6; }
+
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; width: 100%; max-width: 1100px; align-items: center; }
+  .big-stat { font-size: 64px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .big-stat-label { font-size: 18px; color: #64748b; margin-top: 8px; }
+
+  .highlight-box { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(168,85,247,0.1)); border: 1px solid rgba(99,102,241,0.3); border-radius: 16px; padding: 32px; text-align: center; max-width: 700px; }
+  .highlight-box p { font-size: 20px; color: #e2e8f0; line-height: 1.6; }
+
+  .contract-info { display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; font-size: 15px; width: 100%; max-width: 700px; }
+  .contract-info .label { color: #64748b; }
+  .contract-info .value { color: #a5b4fc; font-family: monospace; }
+
+  @media print {
+    .slide { page-break-after: always; height: 100vh; }
+    body { background: #0a0a0f; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Slide 1: Cover -->
+<div class="slide" style="background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.12) 0%, #0a0a0f 60%);">
+  <div class="logo">TaskChain</div>
+  <div class="tag">Cobo Agentic Economy × Cobo Agentic Wallet</div>
+  <h1>TaskChain</h1>
+  <p class="subtitle">多 Agent 协作的 Web3 任务分发网络</p>
+  <p class="meta">AI Agent 自主锁定资金 · 哈希验证交付物 · 自动结算放款</p>
+  <div class="page">01 / 10</div>
+</div>
+
+<!-- Slide 2: Problem -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">问题背景</div>
+  <h2>AI Agent 经济还缺什么？</h2>
+  <div class="features">
+    <div class="feat">
+      <div class="num">❌</div>
+      <div class="title">无法信任交付</div>
+      <div class="desc">Principal Agent 无法验证 Sub-Agent 是否真正完成了任务</div>
+    </div>
+    <div class="feat">
+      <div class="num">❌</div>
+      <div class="title">无法安全托管资金</div>
+      <div class="desc">没有可信的第三方管理资金，必须预付或赊账</div>
+    </div>
+    <div class="feat">
+      <div class="num">❌</div>
+      <div class="title">无法自动结算</div>
+      <div class="desc">任务完成后需要人工介入，无法实现端到端自动化</div>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 48px;">
+    <p>本质问题：AI Agent 之间缺乏<br><strong style="color:#a855f7">去信任化的支付基础设施</strong></p>
+  </div>
+  <div class="page">02 / 10</div>
+</div>
+
+<!-- Slide 3: Solution -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">解决方案</div>
+  <h2>智能合约 = 去信任化的 Escrow</h2>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="name">Owner 创建任务</div>
+      <div class="status">锁定金额 + 哈希</div>
+     <div class="addr">createTask()</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="name">资金托管</div>
+      <div class="status">合约持有 ETH</div>
+      <div class="addr">lockFund()</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="name">Agent提交交付</div>
+      <div class="status">提交数据哈希</div>
+      <div class="addr">submitHash()</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="name">自动验证放款</div>
+      <div class="status">哈希匹配即放款</div>
+      <div class="addr">verifyHash()</div>
+    </div>
+  </div>
+  <div style="margin-top: 48px; text-align: center;">
+    <p style="font-size: 18px; color: #64748b;">整个流程零信任、自动化、不可阻止</p>
+  </div>
+  <div class="page">03 / 10</div>
+</div>
+
+<!-- Slide 4: State Machine -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">核心机制</div>
+  <h2>合约状态机</h2>
+  <div class="flow" style="margin-bottom: 48px;">
+    <span class="state-box s-created">① CREATED</span>
+    <div class="flow-arrow">→</div>
+    <span class="state-box s-funded">② FUNDED</span>
+    <div class="flow-arrow">→</div>
+    <span class="state-box s-submitted">③ SUBMITTED</span>
+    <div class="flow-arrow">→</div>
+    <span class="state-box s-verified">④ VERIFIED ✓</span>
+  </div>
+  <div class="flow">
+    <div class="flow-step" style="border-color: rgba(239,68,68,0.3);">
+      <div class="name">哈希不匹配</div>
+      <div class="status" style="color:#ef4444;">验证失败</div>
+      <div class="addr">verifyHash()</div>
+    </div>
+    <div class="flow-arrow" style="color:#ef4444;">→</div>
+    <span class="state-box s-failed">⑤ FAILED</span>
+    <div class="flow-arrow" style="color:#ef4444;">→</div>
+    <div class="flow-step" style="border-color: rgba(239,68,68,0.3);">
+      <div class="name">Owner 触发退款</div>
+      <div class="status" style="color:#ef4444;">资金原路返回</div>
+      <div class="addr">refund()</div>
+    </div>
+    <div class="flow-arrow" style="color:#ef4444;">→</div>
+    <span class="state-box s-refunded">⑥ REFUNDED</span>
+  </div>
+  <div style="margin-top: 40px; text-align: center;">
+    <p style="font-size: 16px; color: #475569;">72h 超时自动触发 <span style="color:#f59e0b; font-family:monospace;">timeoutRefund()</span>，任何人可调用</p>
+  </div>
+  <div class="page">04 / 10</div>
+</div>
+
+<!-- Slide 5: Contract -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">技术实现</div>
+  <h2>核心合约函数</h2>
+  <div class="code-block">
+<span class="c">// 1. 创建任务（任何人可调）</span>
+<span class="fn">createTask</span>(<span class="c">address _subAgent,</span> <span class="c">uint256 _amount,</span> <span class="c">bytes32 _expectedHash,</span> <span class="c">uint256 _deadline</span>)
+<span class="c">→ returns (uint256 taskId)</span>
+
+<span class="c">// 2. 锁定资金（由 Owner 调用）</span>
+<span class="fn">lockFund</span>(<span class="c">uint256 _taskId</span>) <span class="fn">external payable</span>
+
+<span class="c">// 3. SubAgent 提交哈希（验证者角色控制）</span>
+<span class="fn">submitHash</span>(<span class="c">uint256 _taskId, bytes32 _dataHash</span>)
+
+<span class="c">// 4. 验证并自动放款（哈希匹配则转移 ETH）</span>
+<span class="fn">verifyHash</span>(<span class="c">uint256 _taskId</span>) <span class="fn">nonReentrant returns (bool)</span>
+
+<span class="c">// 5. 退款（仅 Owner，失败后调用）</span>
+<span class="fn">refund</span>(<span class="c">uint256 _taskId</span>) <span class="fn">nonReentrant</span>
+  </div>
+  <div class="contract-info" style="margin-top: 32px;">
+    <span class="label">编译器</span><span class="value">Solidity ^0.8.20</span>
+    <span class="label">安全依赖</span><span class="value">OpenZeppelin ReentrancyGuard + Pausable + Ownable</span>
+    <span class="label">部署网络</span><span class="value">Hardhat Local (chainId: 31337)</span>
+    <span class="label">资金边界</span><span class="value">单任务最多 10 USDC</span>
+  </div>
+  <div class="page">05 / 10</div>
+</div>
+
+<!-- Slide 6: Demo -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">Demo 演示</div>
+  <h2>全链路 Demo 运行结果</h2>
+  <div class="grid-2">
+    <div class="card" style="border-color: rgba(34,197,94,0.3);">
+      <h3 style="color:#22c55e;">✅ 成功场景（Task 0）</h3>
+      <div style="font-size:14px; color:#94a3b8; font-family:monospace; line-height:2;">
+        createTask →<span style="color:#3b82f6">CREATED</span><br>
+        lockFund(5 ETH) → <span style="color:#f59e0b">FUNDED</span><br>
+        submitHash(correct) → <span style="color:#8b5cf6">SUBMITTED</span><br>
+        verifyHash() → <span style="color:#22c55e">VERIFIED → PAID OUT</span><br>
+        <span style="color:#22c55e">SubAgent 收到 5 ETH</span>
+      </div>
+    </div>
+    <div class="card" style="border-color: rgba(239,68,68,0.3);">
+      <h3 style="color:#ef4444;">❌ 失败场景（Task 1）</h3>
+      <div style="font-size:14px; color:#94a3b8; font-family:monospace; line-height:2;">
+        createTask → <span style="color:#3b82f6">CREATED</span><br>
+        lockFund(3 ETH) → <span style="color:#f59e0b">FUNDED</span><br>
+        submitHash(wrong) → <span style="color:#8b5cf6">SUBMITTED</span><br>
+        verifyHash() → <span style="color:#ef4444">FAILED</span><br>
+        refund() → <span style="color:#06b6d4">REFUNDED → Owner 取回 3 ETH</span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top: 32px; text-align: center;">
+    <div class="code-block" style="display: inline-block; text-align: left;">
+<span class="c">$ npx hardhat test</span>  <span class="c">→4 passing (384ms)</span>
+<span class="c">$ npx hardhat run scripts/full-demo.ts</span>  <span class="c">→  全链路跑通</span>
+    </div>
+  </div>
+  <div class="page">06 / 10</div>
+</div>
+
+<!-- Slide 7: Dashboard -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">产品演示</div>
+  <h2>可交互 Dashboard</h2>
+  <div class="split">
+    <div>
+      <h3 style="color:#e2e8f0; font-size:20px; margin-bottom:20px;">功能模块</h3>
+      <div style="font-size:15px; color:#94a3b8; line-height:2.2;">
+        <div>🔗 MetaMask 钱包连接</div>
+       <div>⚙ 可配置 RPC + 合约地址</div>
+        <div>📋 实时任务列表 + 状态标签</div>
+       <div>🔍 Read-Only 模式（无需钱包）</div>
+        <div>🔒 Lock Fund / Submit Hash</div>
+        <div>✅ Verify Hash / Refund</div>
+       <div>🔔 交易哈希实时反馈</div>
+      </div>
+      <div style="margin-top: 24px;">
+        <div style="font-size:14px; color:#475569;">访问地址</div>
+        <div style="font-size:16px; color:#818cf8; font-family:monospace;">laren123-ops.github.io/taskchain</div>
+      </div>
+    </div>
+    <div style="background:#111118; border:1px solid #2a2a3e; border-radius:16px; padding:24px; text-align:center;">
+      <div style="font-size:14px; color:#64748b; margin-bottom:16px;">Dashboard 截图</div>
+      <div style="background:#1a1a2e; border-radius:8px; padding:20px; text-align:left; font-size:12px; color:#64748b;">
+        <div style="color:#e2e8f0; font-weight:600; margin-bottom:12px;">TaskChain  <span style="color:#6366f1; float:right;">⚙</span></div>
+        <div style="margin-bottom:8px;">🔍 <span style="color:#818cf8">Read Only</span>  <button style="background:#6366f1; color:#fff; border:none; padding:4px 12px; border-radius:4px; font-size:11px; float:right;">Connect</button></div>
+        <div style="background:#0d0d14; border-radius:6px; padding:12px; margin-top:12px;">
+          <div style="color:#3b82f6; margin-bottom:6px;">Task #0  <span style="background:#22c55e; color:#fff; padding:2px 8px; border-radius:10px; font-size:10px; float:right;">VERIFIED</span></div>
+          <div style="color:#475569; font-size:11px;">Owner: 0xf39B...2266</div>
+          <div style="color:#475569; font-size:11px;">Amount: 5.0 ETH</div>
+          <div style="color:#475569; font-size:11px;">Hash: 0x64e9...88c6</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page">07 / 10</div>
+</div>
+
+<!-- Slide 8: Business -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">商业模式</div>
+  <h2>变现路径</h2>
+  <div class="features">
+    <div class="feat">
+      <div class="num">1</div>
+      <div class="title">任务手续费</div>
+      <div class="desc">每笔成功结算抽取 1-3% 平台手续费，按任务金额阶梯计费</div>
+    </div>
+    <div class="feat">
+      <div class="num">2</div>
+      <div class="title">Agent 即服务</div>
+      <div class="desc">提供专业 Sub-Agent 库（数据分析、翻译、内容创作），平台担保交付质量</div>
+    </div>
+    <div class="feat">
+      <div class="num">3</div>
+      <div class="title">企业级套件</div>
+      <div class="desc">为企业提供私有 Agent 网络 + 合规审计 + 多签审批，月订阅制</div>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 40px;">
+    <p>目标市场：2025年 AI Agent 经济规模预估<br><strong style="color:#a855f7; font-size:28px;">$5,000 亿+</strong></p>
+  </div>
+  <div class="page">08 / 10</div>
+</div>
+
+<!-- Slide 9: Competition -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">竞争优势</div>
+  <h2>差异化分析</h2>
+  <div class="comparison">
+    <div class="card">
+      <h3 style="color:#e2e8f0;">传统方式</h3>
+      <div class="comp-item"><span class="comp-no">✗</span> 人工审核验收</div>
+      <div class="comp-item"><span class="comp-no">✗</span> 预付费或赊账</div>
+      <div class="comp-item"><span class="comp-no">✗</span> 争议难以仲裁</div>
+      <div class="comp-item"><span class="comp-no">✗</span> 无法规模化</div>
+      <div class="comp-item"><span class="comp-no">✗</span> 无 Agent 原生支持</div>
+    </div>
+    <div class="card" style="border-color: rgba(99,102,241,0.4);">
+      <h3 style="color:#a855f7;">TaskChain</h3>
+      <div class="comp-item"><span class="comp-yes">✓</span> 哈希自动化验证</div>
+      <div class="comp-item"><span class="comp-yes">✓</span> 智能合约托管</div>
+      <div class="comp-item"><span class="comp-yes">✓</span> 代码即仲裁规则</div>
+      <div class="comp-item"><span class="comp-yes">✓</span> MCP 协议集成</div>
+      <div class="comp-item"><span class="comp-yes">✓</span> Cobo Agentic Wallet 原生</div>
+    </div>
+  </div>
+  <div style="margin-top: 32px; text-align: center;">
+    <p style="font-size:16px; color: #64748b;">赛道契合：Cobo Agentic Wallet 为 Agent 提供资金管理能力，TaskChain 为 Agent 提供任务分发 + 验证结算能力</p>
+  </div>
+  <div class="page">09 / 10</div>
+</div>
+
+<!-- Slide 10: Roadmap -->
+<div class="slide">
+  <div class="logo">TaskChain</div>
+  <div class="tag">路线图</div>
+  <h2>开发计划</h2>
+  <div class="timeline">
+    <div class="t-item">
+      <div class="week">Week 4（当前）</div>
+      <div class="title">Hackathon MVP</div>
+      <div class="desc">合约部署、Demo 跑通、Dashboard 上线、测试全通过</div>
+    </div>
+    <div class="t-item">
+      <div class="week">Week 5</div>
+      <div class="title">MCP Agent 集成</div>
+      <div class="desc">实现 Main Agent ↔ Data Agent ↔ Translator Agent 的 MCP 协议通讯</div>
+    </div>
+    <div class="t-item">
+      <div class="week">Week 6</div>
+      <div class="title">Chainlink Functions</div>
+      <div class="desc">集成 Chainlink 进行真实数据源验证（股价、TVL 等）</div>
+    </div>
+    <div class="t-item">
+      <div class="week">Week 7+</div>
+      <div class="title">主网上线</div>
+      <div class="desc">Polygon zkEVM / zkSync部署、审计、开放 API</div>
+    </div>
+  </div>
+  <div class="highlight-box" style="margin-top: 40px;">
+    <p>GitHub: <span style="color:#818cf8; font-family:monospace;">github.com/Laren123-ops/taskchain</span><br>
+    Dashboard: <span style="color:#818cf8; font-family:monospace;">laren123-ops.github.io/taskchain</span></p>
+  </div>
+  <div class="page">10 / 10</div>
+</div>
+
+</body>
+</html>
